@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Go-Echo-System/router"
 	"github.com/labstack/echo/middleware"
 	"net/http"
 
@@ -15,5 +16,8 @@ func main() {
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
+
+	router.InitRouter(e.Group("/api/v1"))
+
 	e.Logger.Fatal(e.Start(":8080"))
 }
