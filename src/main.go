@@ -2,10 +2,10 @@ package main
 
 import (
 	"Go-Echo-System/router"
-	"github.com/labstack/echo/middleware"
 	"net/http"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
@@ -17,7 +17,7 @@ func main() {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 
-	router.InitRouter(e.Group("/api/v1"))
+	router.InitApiRouter(e.Group("/api/v1"))
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

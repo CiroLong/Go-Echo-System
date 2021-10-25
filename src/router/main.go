@@ -1,8 +1,8 @@
 package router
 
-import "github.com/labstack/echo"
+import "github.com/labstack/echo/v4"
 
-func InitRouter(e *echo.Group) {
+func InitApiRouter(e *echo.Group) {
 	userGroup := e.Group("/user")
 	initUserGroup(userGroup)
 }
