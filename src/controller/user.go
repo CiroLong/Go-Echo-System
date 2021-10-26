@@ -86,18 +86,35 @@ func Login(c echo.Context) error {
 		MaxAge: 86400 * 7, //会话有效期，单位秒
 	}
 	//记录会话数据, sess.Values 是map类型，可以记录多个会话数据
-	sess.Values["id"] = validator.Username
-	sess.Values["isLogin"] = true
+	sess.Values["id"] = user.ID
+	sess.Values["username"] = user.Username
+	sess.Values["isAdmin"] = true
 	//保存用户会话数据
 	sess.Save(c.Request(), c.Response())
 	return c.String(http.StatusOK, "登录成功!")
 }
 
-//func GetUser(c echo.Context) error {
-//	id, _ := strconv.Atoi(c.Param("id"))
-//	return c.JSON(http.StatusOK, users[id])
-//}
-//
+type userInfoResponse struct {
+	ID       uint   `json:"_id"`
+	Username string `json:"username"`
+	IsAdmin  bool   `json:"is_admin"`
+}
+
+func GetUserInfo(c echo.Context) error {
+	sess, _ := session.Get("user_session", c)
+
+	//通过sess.Values读取会话数据
+	id := sess.Values["id"]
+	username := sess.Values["username"]
+	isAdmin := sess.Values["isAdmin"]
+
+	_, found, _ := model.GetUserWithUsername(username.(string))
+	if !found {
+		c.String(http.StatusBadRequest, "no such user")
+	}
+	return c.JSON(http.StatusOK, userInfoResponse{ID: id.(uint), Username: username.(string), IsAdmin: isAdmin.(bool)})
+}
+
 //func UpdateUser(c echo.Context) error {
 //	u := new(user)
 //	if err := c.Bind(u); err != nil {

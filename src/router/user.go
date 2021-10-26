@@ -7,5 +7,7 @@ import (
 
 func initUserGroup(group *echo.Group) {
 	group.GET("/test", controller.Test)
+	group.POST("/register", controller.UserRegister)
 	group.POST("/login", controller.Login)
+	group.GET("/info", controller.GetUserInfo)
 }

@@ -10,3 +10,6 @@ var (
 	store             = sessions.NewFilesystemStore("./", securecookie.GenerateRandomKey(32), securecookie.GenerateRandomKey(32))
 	SessionMiddleWare = session.Middleware(store)
 )
+
+func init() {
+}

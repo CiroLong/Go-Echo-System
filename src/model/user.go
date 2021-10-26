@@ -20,7 +20,7 @@ func GetUserWithUsername(userName string) (User, bool, error) {
 	if u, ok := DB.users[userName]; ok {
 		return u, true, nil
 	} else {
-		return u, false, errors.New("no such user")
+		return u, false, nil
 	}
 }
 
