@@ -35,5 +35,5 @@ func main() {
 
 	router.InitApiRouter(e.Group("/api/v1"))
 
-	e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(":80"))
 }

@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	store             = sessions.NewFilesystemStore("./", securecookie.GenerateRandomKey(32), securecookie.GenerateRandomKey(32))
+	store             = sessions.NewFilesystemStore("../session_cache", securecookie.GenerateRandomKey(32), securecookie.GenerateRandomKey(32))
 	SessionMiddleWare = session.Middleware(store)
 )
 
