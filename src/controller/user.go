@@ -79,7 +79,7 @@ func Login(c echo.Context) error {
 	}
 	//密码正确, 下面开始注册用户会话数据
 	//以user_session作为会话名字，获取一个session对象
-	sess, _ := session.Get("user_session", c)
+	sess, _ := session.Get("_gt_session", c)
 	//设置会话参数
 	sess.Options = &sessions.Options{
 		Path:   "/",       //所有页面都可以访问会话数据
