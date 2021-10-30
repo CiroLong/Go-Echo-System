@@ -2,7 +2,7 @@ package controller
 
 import (
 	"Go-Echo-System/model"
-	"encoding/base64"
+	"Go-Echo-System/utils"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
@@ -37,9 +37,10 @@ func UserRegister(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "username already exists")
 	}
 
-	user := model.User{
-		Username: param.Username,
-		Password: base64.StdEncoding.EncodeToString([]byte(param.Password)), //  存密文
+	user := model.User{Username: param.Username}
+	user.Password, err = user.HashPassword(param.Password)
+	if err != nil {
+
 	}
 	id, err := model.AddUser(user)
 	if err != nil {
@@ -74,8 +75,9 @@ func Login(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	//校验密码是否正确
-	if user.Password != base64.StdEncoding.EncodeToString([]byte(validator.Password)) {
-		return c.String(http.StatusForbidden, "username and password don't match")
+	ok := user.CheckPassword(validator.Password)
+	if !ok {
+		return utils.ErrorResponse(c, http.StatusForbidden, "password is not correct")
 	}
 	//密码正确, 下面开始注册用户会话数据
 	//以user_session作为会话名字，获取一个session对象

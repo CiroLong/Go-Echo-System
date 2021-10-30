@@ -15,7 +15,7 @@ type CustomValidator struct {
 func (cv *CustomValidator) Validate(i interface{}) error {
 	return cv.validator.Struct(i)
 }
-func Router() *echo.Echo {
+func New() *echo.Echo {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
@@ -25,11 +25,11 @@ func Router() *echo.Echo {
 		validator: validator.New(),
 	}
 
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
+	e.GET("/ping", func(c echo.Context) error {
+		return c.String(http.StatusOK, "pong")
 	})
 
-	InitApiRouter(e.Group("/"))
+	InitApiRouter(e.Group(""))
 	return e
 }
 

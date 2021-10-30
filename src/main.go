@@ -8,6 +8,6 @@ import (
 func main() {
 	model.InitModel()
 
-	e := router.Router()
+	e := router.New()
 	e.Logger.Fatal(e.Start(":8080"))
 }
