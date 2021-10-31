@@ -14,28 +14,14 @@ type githubLoginForm struct {
 	Username string `json:"login" form:"login" validate:"required"`
 	Password string `json:"password" form:"password" validate:"required"`
 
-	RediectTo string `json:"return_to" form:"return_to" validate:"required"`
-	Token     string `json:"authenticity_token" form:"authenticity_token"`
-	Commit    string `json:"commit" form:"commit" `
+	RedirectTo string `json:"return_to" form:"return_to" validate:"required"`
+	Token      string `json:"authenticity_token" form:"authenticity_token"`
+	Commit     string `json:"commit" form:"commit" `
 }
 
-/* github 的cookie有那些字段
-%2FEA99DSnWRcCZYyDowR76aur2vCOI%2FccgmhRrx3%2B%2F%2FMz8LMBwA6O4Gp4%2FD4%2BgyILrQi%2FbS3X5k0LPu%2FAGDkk2Wga2oWKRIHX9hPzPZVkMWHSymjBVfU%2Fb2u%2FogpTpWyOtS75k3rqoU1PHruKQlT7GwG%2F7D577rA0MBQvWJejVlwL5D2p%2BlL9i3Gx%2B7V4meY4R1AMkVKCXP8Io4JYUdBuu59%2F%2BTE8jpqh1b8tn1FQdhN%2FFBQMDQz9eeN%2FRndGAgEsifh7%2BG5hnmjWsMrzz1XG%2BA%3D%3D--7Si7wJF%2B8kwZNtL5--3Iwfc3RdFKiHNXCS%2B2kTNw%3D%3D	gi
-Name	Value Domain   path        Expires  ...
-
-
-has_recent_activity	1	github.com	/	2021-10-28T09:12:54.000Z	101	✓	✓	Lax		Medium
-logged_in	yes	.github.com	/	2022-10-28T08:12:54.000Z	113	✓	✓	Lax		Medium
-dotcom_user	CiroLong	.github.com	/	2022-10-28T08:12:54.000Z	120	✓	✓	Lax		Medium
-
-__Host-user_session_same_site	GU9lnyCdKVoWfVuzPg0nGEl3OVIRY85yzOsqpN4xkhBjIcYU	github.com	/	2021-11-11T08:12:54.000Z	161	✓	✓	Strict		Medium
-user_session	GU9lnyCdKVoWfVuzPg0nGEl3OVIRY85yzOsqpN4xkhBjIcYU	github.com	/	2021-11-11T08:12:54.000Z	141	✓	✓	Lax		Medium
-_gh_sess	9w6fcamUqk3FAuVE5%2BD1X9a%2Ft4nL0tS5x%2BQxsNad8p…..	github.com	/	Session	1299	✓	✓	Lax		Medium
-*/
-
-// 总结：_gh_sess 在登陆时使用，确定登录步骤
+// GithubSession 总结：_gh_sess 在登陆时使用，确定登录步骤
 // user_session 在登录后使用，确定用户状态
-func Session(c echo.Context) error {
+func GithubSession(c echo.Context) error {
 	var validator githubLoginForm
 	if err := c.Bind(&validator); err != nil {
 		return utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
@@ -59,7 +45,7 @@ func Session(c echo.Context) error {
 	}
 	//!< 首先处理headers
 	c.Response().Header().Add("cache-control", "no-cache")
-	c.Response().Header().Add("location", validator.RediectTo)
+	c.Response().Header().Add("location", validator.RedirectTo)
 	c.Response().Header().Add("permissions-policy", "interest-cohort=()")
 	c.Response().Header().Add("referrer-policy", "origin-when-cross-origin, strict-origin-when-cross-origin")
 	c.Response().Header().Add("server", "GitHub.com")
@@ -68,7 +54,7 @@ func Session(c echo.Context) error {
 	c.Response().Header().Add("vary", "Accept-Encoding, Accept, X-Requested-With")
 	c.Response().Header().Add("x-content-type-options", "nosniff")
 	c.Response().Header().Add("x-frame-options", "deny")
-	c.Response().Header().Add("x-github-request-id", "8C58:6C7C:157CFC:1D344C:617CF5C0") // ?? value?
+	//c.Response().Header().Add("x-github-request-id", "8C58:6C7C:157CFC:1D344C:617CF5C0") // ?? what's up?
 	c.Response().Header().Add("x-xss-protection", "0")
 	//!< 然后处理set-cookie
 	{
@@ -114,6 +100,7 @@ func Session(c echo.Context) error {
 			SameSite: http.SameSiteLaxMode, //Lax
 		}
 		gtSess.Values["isAdmin"] = true
+		gtSess.Values["username"] = user.Username
 		gtSess.Save(c.Request(), c.Response())
 		//dotcom_user
 		dotcomUser := &http.Cookie{
@@ -167,5 +154,64 @@ func Session(c echo.Context) error {
 	}
 
 	//return utils.SuccessResponse(c, http.StatusOK, "session ok")
-	return c.Redirect(http.StatusNotModified, validator.RediectTo) // 	重定向
+	return c.Redirect(http.StatusNotModified, validator.RedirectTo) // 	重定向
+}
+
+func GithubLogin(c echo.Context) error {
+	//!< headers
+	c.Response().Header().Add("cache-control", "no-cache")
+	c.Response().Header().Add("location", "https://github.com/")
+	c.Response().Header().Add("permissions-policy", "interest-cohort=()")
+	c.Response().Header().Add("referrer-policy", "origin-when-cross-origin, strict-origin-when-cross-origin")
+	c.Response().Header().Add("server", "GitHub.com")
+	c.Response().Header().Add("strict-transport-security", "max-age=31536000; includeSubdomains; preload")
+	c.Response().Header().Add("vary", "X-PJAX, X-PJAX-Container")
+	c.Response().Header().Add("vary", "Accept-Encoding, Accept, X-Requested-With")
+	c.Response().Header().Add("x-content-type-options", "nosniff")
+	c.Response().Header().Add("x-frame-options", "deny")
+	//c.Response().Header().Add("x-github-request-id", "8C58:6C7C:157CFC:1D344C:617CF5C0") // ?? what's up?
+	c.Response().Header().Add("x-xss-protection", "0")
+
+	//!< 验证
+	sess, _ := session.Get("_gh_sess", c)
+	isAdmin, ok := sess.Values["isAdmin"]
+	if !ok || !isAdmin.(bool) {
+		return c.Redirect(http.StatusNotModified, "https://github.com/") // 	重定向
+	}
+	username, _ := sess.Values["username"]
+	_, found, _ := model.GetUserWithUsername(username.(string))
+	if !found {
+		return utils.ErrorResponse(c, http.StatusForbidden, "no such user")
+	}
+	//!< set-cookies
+
+	// _gt_sess
+	gtSess, _ := session.Get("_gt_sess", c)
+	gtSess.Options = &sessions.Options{
+		Domain:   "github.com",
+		Path:     "/",                 //所有页面都可以访问会话数据
+		MaxAge:   int(time.Hour * 24), //会话有效期，单位秒
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode, //Lax
+	}
+	gtSess.Values["end"] = true
+	gtSess.Save(c.Request(), c.Response())
+	now := time.Now()
+	//has_recent_activity
+	hasRecentActivity := &http.Cookie{
+		Name:       "has_recent_activity",
+		Value:      "1",
+		Path:       "/",
+		Domain:     "github.com",
+		Expires:    now.Add(time.Hour),
+		RawExpires: now.Add(time.Hour).Format(time.UnixDate),
+		MaxAge:     int(time.Hour),
+		Secure:     true,
+		HttpOnly:   true,
+		SameSite:   http.SameSiteLaxMode,
+	}
+	c.SetCookie(hasRecentActivity)
+
+	return c.Redirect(http.StatusNotModified, "https://github.com/")
 }

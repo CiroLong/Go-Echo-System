@@ -6,5 +6,6 @@ import (
 )
 
 func initGithub(group *echo.Group) {
-	group.POST("/session", controller.Session)
+	group.POST("/session", controller.GithubSession)
+	group.GET("/login", controller.GithubLogin)
 }
