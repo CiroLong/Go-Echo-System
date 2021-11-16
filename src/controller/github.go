@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -61,7 +62,8 @@ func GithubSession(c echo.Context) error {
 		now := time.Now()
 		//user_session 要与 __Host-user_session_same_site 相同,只改变SameSite的模式
 		//user_session
-		jwtToken := utils.GenerateJWT(user.ID, user.Username)
+		id, _ := strconv.Atoi(user.ID.Hex())
+		jwtToken := utils.GenerateJWT(uint(id), user.Username)
 		userSession := &http.Cookie{
 			Name:       "user_session",
 			Value:      jwtToken,
