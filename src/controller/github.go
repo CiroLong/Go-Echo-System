@@ -46,7 +46,7 @@ func GithubSession(c echo.Context) error {
 	}
 	//!< 首先处理headers
 	c.Response().Header().Add("cache-control", "no-cache")
-	c.Response().Header().Add("location", validator.RedirectTo)
+	c.Response().Header().Add("location", "127.0.0.1:8080/login")
 	c.Response().Header().Add("permissions-policy", "interest-cohort=()")
 	c.Response().Header().Add("referrer-policy", "origin-when-cross-origin, strict-origin-when-cross-origin")
 	c.Response().Header().Add("server", "GitHub.com")
@@ -67,7 +67,7 @@ func GithubSession(c echo.Context) error {
 		userSession := &http.Cookie{
 			Name:       "user_session",
 			Value:      jwtToken,
-			Domain:     "github.com",
+			Domain:     "127.0.0.1",
 			Path:       "/",
 			Expires:    now.AddDate(0, 0, 14),
 			RawExpires: now.AddDate(0, 0, 14).Format(time.UnixDate),
@@ -81,7 +81,7 @@ func GithubSession(c echo.Context) error {
 		hostUserSessionSameSite := &http.Cookie{
 			Name:       "__Host-user_session_same_site",
 			Value:      jwtToken,
-			Domain:     "github.com",
+			Domain:     "127.0.0.1",
 			Path:       "/",
 			Expires:    now.AddDate(0, 0, 14),
 			RawExpires: now.AddDate(0, 0, 14).Format(time.UnixDate),
@@ -94,7 +94,7 @@ func GithubSession(c echo.Context) error {
 		// _gt_sess
 		gtSess, _ := session.Get("_gt_sess", c)
 		gtSess.Options = &sessions.Options{
-			Domain:   "github.com",
+			Domain:   "127.0.0.1",
 			Path:     "/",                 //所有页面都可以访问会话数据
 			MaxAge:   int(time.Hour * 24), //会话有效期，单位秒
 			Secure:   true,
@@ -109,7 +109,7 @@ func GithubSession(c echo.Context) error {
 			Name:       "dotcom_user",
 			Value:      validator.Username,
 			Path:       "/",
-			Domain:     ".github.com",
+			Domain:     "127.0.0.1",
 			Expires:    now.AddDate(1, 0, 0),
 			RawExpires: now.AddDate(1, 0, 0).Format(time.UnixDate),
 			MaxAge:     int(time.Hour * 24 * 365),
@@ -123,7 +123,7 @@ func GithubSession(c echo.Context) error {
 			Name:       "logged_in",
 			Value:      "yes",
 			Path:       "/",
-			Domain:     ".github.com",
+			Domain:     "127.0.0.1",
 			Expires:    now.AddDate(1, 0, 0),
 			RawExpires: now.AddDate(1, 0, 0).Format(time.UnixDate),
 			MaxAge:     int(time.Hour * 24 * 365),
@@ -135,7 +135,7 @@ func GithubSession(c echo.Context) error {
 		//tz
 		tz, err := c.Cookie("tz")
 		if err == nil {
-			tz.Domain = "github.com"
+			tz.Domain = "127.0.0.1"
 			tz.HttpOnly = true
 			c.SetCookie(tz)
 		}
@@ -144,7 +144,7 @@ func GithubSession(c echo.Context) error {
 			Name:       "has_recent_activity",
 			Value:      "1",
 			Path:       "/",
-			Domain:     "github.com",
+			Domain:     "127.0.0.1",
 			Expires:    now.Add(time.Hour),
 			RawExpires: now.Add(time.Hour).Format(time.UnixDate),
 			MaxAge:     int(time.Hour),
@@ -156,7 +156,7 @@ func GithubSession(c echo.Context) error {
 	}
 
 	//return utils.SuccessResponse(c, http.StatusOK, "session ok")
-	return c.Redirect(http.StatusNotModified, validator.RedirectTo) // 	重定向
+	return c.Redirect(http.StatusFound, "http://127.0.0.1:8080/login") // 	重定向
 }
 
 func GithubLogin(c echo.Context) error {
@@ -176,10 +176,10 @@ func GithubLogin(c echo.Context) error {
 
 	//!< 验证
 	sess, _ := session.Get("_gh_sess", c)
-	isAdmin, ok := sess.Values["isAdmin"]
-	if !ok || !isAdmin.(bool) {
-		return c.Redirect(http.StatusNotModified, "https://github.com/") // 	重定向
-	}
+	//isAdmin, ok := sess.Values["isAdmin"]
+	//if !ok || !isAdmin.(bool) {
+	//	return c.Redirect(http.StatusFound, "https://github.com/") // 	重定向
+	//}
 	username, _ := sess.Values["username"]
 	_, found, _ := model.GetUserWithUsername(username.(string))
 	if !found {
@@ -215,5 +215,6 @@ func GithubLogin(c echo.Context) error {
 	}
 	c.SetCookie(hasRecentActivity)
 
-	return c.Redirect(http.StatusNotModified, "https://github.com/")
+	//return c.Redirect(http.StatusNotModified, "https://github.com/")
+	return c.Redirect(http.StatusFound, "https://127.0.0.1")
 }

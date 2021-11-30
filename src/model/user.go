@@ -7,15 +7,24 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 )
 
 const colNameUser = "userModel"
-const secretCost = 23 // 	bcrypt包加密用
+const secretCost = bcrypt.DefaultCost // 	bcrypt包加密用
 
 var colUser *mongo.Collection
 
 func initModelUser() {
 	colUser = MongoDB.Collection(colNameUser)
+
+	//?? 这里插入成功了
+	user := User{
+		ID: primitive.NewObjectID(),
+		Username: "asdasd",
+	}
+	_, err  := colUser.InsertOne(context.Background(), user)
+	if err != nil {log.Println(err.Error())}
 }
 
 //	姓名、个人说明、邮箱、网站、头像

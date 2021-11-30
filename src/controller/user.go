@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
+	"log"
 	"net/http"
 )
 
@@ -17,7 +18,7 @@ type paramUserRegister struct {
 }
 
 type responseUserRegister struct {
-	ID uint `json:"_id"`
+	ID string `json:"_id"`
 }
 
 func UserRegister(c echo.Context) error {
@@ -29,6 +30,8 @@ func UserRegister(c echo.Context) error {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 
+
+
 	_, found, err := model.GetUserWithUsername(param.Username)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
@@ -37,15 +40,23 @@ func UserRegister(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "username already exists")
 	}
 
+	log.Println("---------------------------")
 	user := model.User{Username: param.Username}
-	user.Password, err = user.HashPassword(param.Password)
+	log.Println("---------------------------")
+	log.Println("---------------------------")
+	user.PasswordHash, err = user.HashPassword(param.Password)
 	if err != nil {
-
+		log.Println("Hash err", err.Error())
+		return c.String(http.StatusBadRequest, err.Error())
 	}
+
+	log.Println("---------------------------")
 	id, err := model.AddUser(user)
 	if err != nil {
+		log.Println("add user err:", err)
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
+
 
 	return c.JSON(http.StatusCreated, responseUserRegister{
 		ID: id,
