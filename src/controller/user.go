@@ -30,8 +30,6 @@ func UserRegister(c echo.Context) error {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 
-
-
 	_, found, err := model.GetUserWithUsername(param.Username)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
@@ -40,23 +38,18 @@ func UserRegister(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "username already exists")
 	}
 
-	log.Println("---------------------------")
 	user := model.User{Username: param.Username}
-	log.Println("---------------------------")
-	log.Println("---------------------------")
 	user.PasswordHash, err = user.HashPassword(param.Password)
 	if err != nil {
 		log.Println("Hash err", err.Error())
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 
-	log.Println("---------------------------")
 	id, err := model.AddUser(user)
 	if err != nil {
 		log.Println("add user err:", err)
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
-
 
 	return c.JSON(http.StatusCreated, responseUserRegister{
 		ID: id,
@@ -91,7 +84,7 @@ func Login(c echo.Context) error {
 		return utils.ErrorResponse(c, http.StatusForbidden, "password is not correct")
 	}
 	//密码正确, 下面开始注册用户会话数据
-	//以user_session作为会话名字，获取一个session对象
+	//以_gt_session 作为会话名字，获取一个session对象
 	sess, _ := session.Get("_gt_session", c)
 	//设置会话参数
 	sess.Options = &sessions.Options{
@@ -99,33 +92,30 @@ func Login(c echo.Context) error {
 		MaxAge: 86400 * 7, //会话有效期，单位秒
 	}
 	//记录会话数据, sess.Values 是map类型，可以记录多个会话数据
-	sess.Values["id"] = user.ID
+	sess.Values["id"] = user.ID.Hex()
 	sess.Values["username"] = user.Username
-	sess.Values["isAdmin"] = true
 	//保存用户会话数据
 	sess.Save(c.Request(), c.Response())
 	return c.String(http.StatusOK, "登录成功!")
 }
 
 type userInfoResponse struct {
-	ID       uint   `json:"_id"`
+	ID       string `json:"_id"`
 	Username string `json:"username"`
-	IsAdmin  bool   `json:"is_admin"`
 }
 
 func GetUserInfo(c echo.Context) error {
-	sess, _ := session.Get("user_session", c)
+	sess, _ := session.Get("_gt_session", c)
 
 	//通过sess.Values读取会话数据
 	id := sess.Values["id"]
 	username := sess.Values["username"]
-	isAdmin := sess.Values["isAdmin"]
 
 	_, found, _ := model.GetUserWithUsername(username.(string))
 	if !found {
 		c.String(http.StatusBadRequest, "no such user")
 	}
-	return c.JSON(http.StatusOK, userInfoResponse{ID: id.(uint), Username: username.(string), IsAdmin: isAdmin.(bool)})
+	return c.JSON(http.StatusOK, userInfoResponse{ID: id.(string), Username: username.(string)})
 }
 
 //func UpdateUser(c echo.Context) error {
@@ -143,3 +133,13 @@ func GetUserInfo(c echo.Context) error {
 //	delete(users, id)
 //	return c.NoContent(http.StatusNoContent)
 //}
+
+func GetAllUserInfos(ctx echo.Context) error {
+
+	users, err := model.GetAllUsers()
+	if err != nil {
+		return utils.ErrorResponse(ctx, http.StatusBadRequest, err.Error())
+	}
+
+	return utils.SuccessResponse(ctx, http.StatusOK, users)
+}

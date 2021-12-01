@@ -10,4 +10,6 @@ func initUserGroup(group *echo.Group) {
 	group.POST("/register", controller.UserRegister)
 	group.POST("/login", controller.Login)
 	group.GET("/info", controller.GetUserInfo)
+
+	group.GET("/all", controller.GetAllUserInfos)
 }

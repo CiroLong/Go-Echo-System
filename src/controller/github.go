@@ -62,97 +62,109 @@ func GithubSession(c echo.Context) error {
 		now := time.Now()
 		//user_session 要与 __Host-user_session_same_site 相同,只改变SameSite的模式
 		//user_session
-		id, _ := strconv.Atoi(user.ID.Hex())
-		jwtToken := utils.GenerateJWT(uint(id), user.Username)
-		userSession := &http.Cookie{
-			Name:       "user_session",
-			Value:      jwtToken,
-			Domain:     "127.0.0.1",
-			Path:       "/",
-			Expires:    now.AddDate(0, 0, 14),
-			RawExpires: now.AddDate(0, 0, 14).Format(time.UnixDate),
-			MaxAge:     int(time.Hour * 24 * 14), //两周
-			Secure:     true,
-			HttpOnly:   true,
-			SameSite:   http.SameSiteLaxMode, //Lax
+		{
+			id, _ := strconv.Atoi(user.ID.Hex())
+			jwtToken := utils.GenerateJWT(uint(id), user.Username) //	转换id号，变成JWT
+			userSession := &http.Cookie{
+				Name:       "user_session",
+				Value:      jwtToken,
+				Domain:     "127.0.0.1",
+				Path:       "/",
+				Expires:    now.AddDate(0, 0, 14),
+				RawExpires: now.AddDate(0, 0, 14).Format(time.UnixDate),
+				MaxAge:     int(time.Hour * 24 * 14), //两周
+				Secure:     true,
+				HttpOnly:   true,
+				SameSite:   http.SameSiteLaxMode, //Lax
+			}
+			c.SetCookie(userSession)
+			//__Host-user_session_same_site
+			hostUserSessionSameSite := &http.Cookie{
+				Name:       "__Host-user_session_same_site",
+				Value:      jwtToken,
+				Domain:     "127.0.0.1",
+				Path:       "/",
+				Expires:    now.AddDate(0, 0, 14),
+				RawExpires: now.AddDate(0, 0, 14).Format(time.UnixDate),
+				MaxAge:     int(time.Hour * 24 * 14), //两周
+				Secure:     true,
+				HttpOnly:   true,
+				SameSite:   http.SameSiteStrictMode, //Strict
+			}
+			c.SetCookie(hostUserSessionSameSite)
 		}
-		c.SetCookie(userSession)
-		//__Host-user_session_same_site
-		hostUserSessionSameSite := &http.Cookie{
-			Name:       "__Host-user_session_same_site",
-			Value:      jwtToken,
-			Domain:     "127.0.0.1",
-			Path:       "/",
-			Expires:    now.AddDate(0, 0, 14),
-			RawExpires: now.AddDate(0, 0, 14).Format(time.UnixDate),
-			MaxAge:     int(time.Hour * 24 * 14), //两周
-			Secure:     true,
-			HttpOnly:   true,
-			SameSite:   http.SameSiteStrictMode, //Strict
-		}
-		c.SetCookie(hostUserSessionSameSite)
 		// _gt_sess
-		gtSess, _ := session.Get("_gt_sess", c)
-		gtSess.Options = &sessions.Options{
-			Domain:   "127.0.0.1",
-			Path:     "/",                 //所有页面都可以访问会话数据
-			MaxAge:   int(time.Hour * 24), //会话有效期，单位秒
-			Secure:   true,
-			HttpOnly: true,
-			SameSite: http.SameSiteLaxMode, //Lax
+		{
+			gtSess, _ := session.Get("_gh_sess", c)
+			gtSess.Options = &sessions.Options{
+				Domain:   "127.0.0.1",
+				Path:     "/",                 //所有页面都可以访问会话数据
+				MaxAge:   int(time.Hour * 24), //会话有效期，单位秒
+				Secure:   true,
+				HttpOnly: true,
+				SameSite: http.SameSiteLaxMode, //Lax
+			}
+			gtSess.Values["id"] = user.ID.Hex()
+			gtSess.Values["username"] = user.Username
+			gtSess.Save(c.Request(), c.Response())
 		}
-		gtSess.Values["isAdmin"] = true
-		gtSess.Values["username"] = user.Username
-		gtSess.Save(c.Request(), c.Response())
 		//dotcom_user
-		dotcomUser := &http.Cookie{
-			Name:       "dotcom_user",
-			Value:      validator.Username,
-			Path:       "/",
-			Domain:     "127.0.0.1",
-			Expires:    now.AddDate(1, 0, 0),
-			RawExpires: now.AddDate(1, 0, 0).Format(time.UnixDate),
-			MaxAge:     int(time.Hour * 24 * 365),
-			Secure:     true,
-			HttpOnly:   true,
-			SameSite:   http.SameSiteLaxMode,
+		{
+			dotcomUser := &http.Cookie{
+				Name:       "dotcom_user",
+				Value:      validator.Username,
+				Path:       "/",
+				Domain:     "127.0.0.1",
+				Expires:    now.AddDate(1, 0, 0),
+				RawExpires: now.AddDate(1, 0, 0).Format(time.UnixDate),
+				MaxAge:     int(time.Hour * 24 * 365),
+				Secure:     true,
+				HttpOnly:   true,
+				SameSite:   http.SameSiteLaxMode,
+			}
+			c.SetCookie(dotcomUser)
 		}
-		c.SetCookie(dotcomUser)
 		//logged_in
-		loggedIn := &http.Cookie{
-			Name:       "logged_in",
-			Value:      "yes",
-			Path:       "/",
-			Domain:     "127.0.0.1",
-			Expires:    now.AddDate(1, 0, 0),
-			RawExpires: now.AddDate(1, 0, 0).Format(time.UnixDate),
-			MaxAge:     int(time.Hour * 24 * 365),
-			Secure:     true,
-			HttpOnly:   true,
-			SameSite:   http.SameSiteLaxMode,
+		{
+			loggedIn := &http.Cookie{
+				Name:       "logged_in",
+				Value:      "yes",
+				Path:       "/",
+				Domain:     "127.0.0.1",
+				Expires:    now.AddDate(1, 0, 0),
+				RawExpires: now.AddDate(1, 0, 0).Format(time.UnixDate),
+				MaxAge:     int(time.Hour * 24 * 365),
+				Secure:     true,
+				HttpOnly:   true,
+				SameSite:   http.SameSiteLaxMode,
+			}
+			c.SetCookie(loggedIn)
 		}
-		c.SetCookie(loggedIn)
 		//tz
-		tz, err := c.Cookie("tz")
-		if err == nil {
-			tz.Domain = "127.0.0.1"
-			tz.HttpOnly = true
-			c.SetCookie(tz)
+		{
+			tz, err := c.Cookie("tz")
+			if err == nil {
+				tz.Domain = "127.0.0.1"
+				tz.HttpOnly = true
+				c.SetCookie(tz)
+			}
 		}
 		//has_recent_activity
-		hasRecentActivity := &http.Cookie{
-			Name:       "has_recent_activity",
-			Value:      "1",
-			Path:       "/",
-			Domain:     "127.0.0.1",
-			Expires:    now.Add(time.Hour),
-			RawExpires: now.Add(time.Hour).Format(time.UnixDate),
-			MaxAge:     int(time.Hour),
-			Secure:     true,
-			HttpOnly:   true,
-			SameSite:   http.SameSiteLaxMode,
+		{
+			hasRecentActivity := &http.Cookie{
+				Name:       "has_recent_activity",
+				Value:      "1",
+				Path:       "/",
+				Domain:     "127.0.0.1",
+				Expires:    now.Add(time.Hour),
+				RawExpires: now.Add(time.Hour).Format(time.UnixDate),
+				MaxAge:     int(time.Hour),
+				Secure:     true,
+				HttpOnly:   true,
+				SameSite:   http.SameSiteLaxMode,
+			}
+			c.SetCookie(hasRecentActivity)
 		}
-		c.SetCookie(hasRecentActivity)
 	}
 
 	//return utils.SuccessResponse(c, http.StatusOK, "session ok")
@@ -180,17 +192,17 @@ func GithubLogin(c echo.Context) error {
 	//if !ok || !isAdmin.(bool) {
 	//	return c.Redirect(http.StatusFound, "https://github.com/") // 	重定向
 	//}
-	username, _ := sess.Values["username"]
-	_, found, _ := model.GetUserWithUsername(username.(string))
+	idhex, _ := sess.Values["id"]
+	_, found, _ := model.GetUserWithID(idhex.(string))
 	if !found {
 		return utils.ErrorResponse(c, http.StatusForbidden, "no such user")
 	}
 	//!< set-cookies
 
 	// _gt_sess
-	gtSess, _ := session.Get("_gt_sess", c)
+	gtSess, _ := session.Get("_gh_sess", c)
 	gtSess.Options = &sessions.Options{
-		Domain:   "github.com",
+		Domain:   "127.0.0.1",
 		Path:     "/",                 //所有页面都可以访问会话数据
 		MaxAge:   int(time.Hour * 24), //会话有效期，单位秒
 		Secure:   true,
@@ -205,7 +217,7 @@ func GithubLogin(c echo.Context) error {
 		Name:       "has_recent_activity",
 		Value:      "1",
 		Path:       "/",
-		Domain:     "github.com",
+		Domain:     "127.0.0.1",
 		Expires:    now.Add(time.Hour),
 		RawExpires: now.Add(time.Hour).Format(time.UnixDate),
 		MaxAge:     int(time.Hour),
