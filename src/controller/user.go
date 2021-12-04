@@ -66,17 +66,17 @@ type loginResponse struct {
 func Login(c echo.Context) error {
 	var validator loginValidator
 	if err := c.Bind(&validator); err != nil {
-		return c.String(http.StatusBadRequest, err.Error())
+		return utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
 	}
 	if err := c.Validate(validator); err != nil {
-		return c.String(http.StatusBadRequest, err.Error())
+		return utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
 	}
 	user, found, err := model.GetUserWithUsername(validator.Username)
 	if !found {
-		return c.String(http.StatusBadRequest, "user not found")
+		return utils.ErrorResponse(c, http.StatusBadRequest, "user not found")
 	}
 	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+		return utils.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 	}
 	//校验密码是否正确
 	ok := user.CheckPassword(validator.Password)
@@ -113,9 +113,9 @@ func GetUserInfo(c echo.Context) error {
 
 	_, found, _ := model.GetUserWithUsername(username.(string))
 	if !found {
-		c.String(http.StatusBadRequest, "no such user")
+		utils.ErrorResponse(c, http.StatusBadRequest, "no such user")
 	}
-	return c.JSON(http.StatusOK, userInfoResponse{ID: id.(string), Username: username.(string)})
+	return utils.SuccessResponse(c, http.StatusOK, userInfoResponse{ID: id.(string), Username: username.(string)})
 }
 
 //func UpdateUser(c echo.Context) error {

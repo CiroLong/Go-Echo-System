@@ -19,19 +19,23 @@ func initModelUser() {
 }
 
 //	姓名、个人说明、邮箱、网站、头像
-// 	使用*string的原因
-// 	If you want to split null and "", you should use *string instead of string.
 type User struct {
 	ID           primitive.ObjectID `bson:"_id" json:"_id"`
 	Username     string             `bson:"username" json:"username"`
 	PasswordHash string             `bson:"password" json:"password"`
-	Statement    string             `bson:"statement" json:"statement"`
 	Email        string             `bson:"email" json:"email"`
-	Image        *string            `bson:"image" json:"image"`
 
-	//Phone        string             `bson:"phone" json:"phone"`
 	IsAdmin  bool `bson:"is_admin" json:"is_admin"` // 管理
 	Verified bool `bson:"verified" json:"verified"` // 已验证
+
+	// 也许应该新建一个结构体
+	Name     string `bson:"name" json:"name"`
+	Bio      string `bson:"bio" json:"bio"`
+	Company  string `bson:"company" json:"company"`
+	Location string `bson:"location" json:"location"`
+	Blog     string `bson:"blog" json:"blog"`
+
+	Image string `bson:"image" json:"image"`
 }
 
 func (u *User) HashPassword(plain string) (string, error) {
@@ -125,6 +129,15 @@ func UpdateUser(idHex string, info bson.M) error {
 	}
 
 	_, err = colUser.UpdateOne(context.Background(), bson.M{"_id": id}, update)
+	//第二个参数指定更新对象，第三个参数指定更新内容
+	return err
+}
+
+func (u *User) Update(info bson.M) error {
+	update := bson.M{
+		"$set": info,
+	}
+	_, err := colUser.UpdateOne(context.Background(), bson.M{"_id": u.ID}, update)
 	//第二个参数指定更新对象，第三个参数指定更新内容
 	return err
 }
