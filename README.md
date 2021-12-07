@@ -15,3 +15,9 @@
         middleware ： 中间件
         config ： 配置文件读取
         main.go
+    session_cache - 	暂时做为本机cookie储存，之后换用redis
+    	
+    static- 静态文件
+    	HTML-
+    	images- 本机储存图片.
+    	
