@@ -6,15 +6,11 @@
 
 ```json
 {
-  "success": true
-  |
-  false,
+  "success": true,
   "message": "这是一些消息",
   "data": {
-[
-  这里是数据
-]
-}
+    "name": "ciro"
+  }
 }
 ```
 
@@ -62,7 +58,7 @@ username already exists
 
 ### 查询个人信息(Profile)
 
-emm,github好像是直接渲染在网页里了
+emm,github好像是直接渲染在网页里了,没有看到对应的api
 
 ```
 api:127.0.0.1:8080/api/v1/user/:username/profile
@@ -89,6 +85,8 @@ method: GET
 ```
 
 ### 更改个人信息(Profile)
+
+需要cookie`_gt_session`
 
 ```
 api:/api/v1/users/:username/profile
@@ -143,11 +141,6 @@ user[profile_twitter_username]:
 
 ### 更改头像
 
-```
-api:
-method: 
-```
-
 分为上传图片和设置头像两个阶段？
 
 Image用编号表示
@@ -155,4 +148,57 @@ Image用编号表示
 在数据库里开个image的编号和类型的存储
 
 ### 关于图片的上传
+
+需要cookie`_gt_session`
+
+```
+api:127.0.0.1:8080/api/v1/user/cirolong/image
+method:POST
+```
+
+采用原始表单上传
+
+```html
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Multiple file upload</title>
+</head>
+
+<body>
+<h1>Upload multiple files with fields</h1>
+
+<form action="/api/v1/user/cirolong/image" method="post" enctype="multipart/form-data">
+    Files: <input type="file" name="file"><br><br>
+    <input type="submit" value="Submit">
+</form>
+</body>
+
+</html>
+```
+
+返回数据格式如下：
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "msg": "File 7pASiCOz2N.jpg uploaded successfully with fields name=%!s(MISSING) and email=%!s(MISSING)."
+  }
+}
+```
+
+### 获取头像图片
+
+需要之前已经上传,不需要cookie，图片由username定位。
+
+```
+api:127.0.0.1:8080/api/v1/user/:username/image
+method: GET
+```
+
+直接返回图片文件
 

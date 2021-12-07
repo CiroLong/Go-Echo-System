@@ -17,4 +17,12 @@ func initUserGroup(group *echo.Group) {
 	// profiles
 	group.POST("/:username", controller.ChangeUserProfile, middleware.UserValidator)
 	group.GET("/:username/profile", controller.GetUserProfile, middleware.UserValidator)
+
+	// images
+	group.POST("/:username/image", controller.UploadIamge, middleware.UserValidator)
+	group.GET("/:username/image", controller.GetYourImage)
+
+	// static
+	group.File("/login.html", "../static/HTML/login.html")
+	group.File("/upload.html", "../static/HTML/uploadImage.html")
 }

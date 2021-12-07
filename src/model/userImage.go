@@ -17,8 +17,9 @@ func initModelUserImage() {
 
 type Image struct {
 	ID       primitive.ObjectID `bson:"_id" json:"_id"`
+	UserId   primitive.ObjectID `bson:"user_id" json:"user_id"`
 	Filename string             `bson:"filename" json:"filename"`
-	Format   string             `bson:"format" json:"format"`
+	//Format   string             `bson:"format" json:"format"`
 }
 
 func AddImage(image Image) (string, error) {
@@ -62,6 +63,18 @@ func GetImageWithIdHex(idHex string) (Image, bool, error) {
 func GetImageWithFilename(filename string) (Image, bool, error) {
 	var image Image
 	err := colUserImage.FindOne(context.Background(), bson.M{"filename": filename}).Decode(&image)
+	if err == mongo.ErrNoDocuments {
+		return image, false, nil
+	}
+	if err != nil {
+		return image, false, err
+	}
+	return image, true, nil
+}
+
+func GetImageWithUserId(userId primitive.ObjectID) (Image, bool, error) {
+	var image Image
+	err := colUserImage.FindOne(context.Background(), bson.M{"user_id": userId}).Decode(&image)
 	if err == mongo.ErrNoDocuments {
 		return image, false, nil
 	}

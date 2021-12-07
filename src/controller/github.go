@@ -228,5 +228,5 @@ func GithubLogin(c echo.Context) error {
 	c.SetCookie(hasRecentActivity)
 
 	//return c.Redirect(http.StatusNotModified, "https://github.com/")
-	return c.Redirect(http.StatusFound, "https://127.0.0.1/")
+	return c.Redirect(http.StatusFound, "http://127.0.0.1/")
 }

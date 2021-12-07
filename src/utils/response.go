@@ -2,6 +2,8 @@ package utils
 
 import "github.com/labstack/echo/v4"
 
+type H map[string]interface{}
+
 type ResponseData struct {
 	Success bool        `json:"success"`
 	Msg     string      `json:"message"`
