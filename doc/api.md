@@ -202,3 +202,77 @@ method: GET
 
 直接返回图片文件
 
+## 关于Issues
+
+> #### Level 2 - 实现 Issue 接口
+>
+>GitHub 还支持 Issue 的提交和变更，请你实现有关 Issue 的接口，要求同上。你需要支持的功能包括：
+>
+>- 获取 Issue 列表
+>- 获取 Issue 的详细情况
+>- 编辑 Issue 信息
+>- 在 Issue 中发表回复
+>- 关闭和开启 Issue
+
+等等，github的issue是对reposity而言的，怎么绑定啊？
+
+> 那就假设有一个不存在的Schrodinger仓库好了hh
+>
+> 直接绑定到user上面()
+
+Model 定义
+
+### how github do it
+
+#### get
+
+```
+请求网址: https://github.com/CiroLong/Go-Echo-System/issues/1
+请求方法: GET
+```
+
+#### 评论
+
+>
+>
+>1. 请求网址:
+>
+>
+>
+>   https://github.com/CiroLong/Go-Echo-System/issue_comments
+>
+>2.
+>
+>   请求方法:
+>
+>
+>
+>   POST
+
+```
+issue: 1
+comment[body]: 这是第二条回复
+
+```
+
+close
+
+```
+comment_and_close: 1
+```
+
+#### 修改title
+
+```
+请求网址: https://github.com/CiroLong/Go-Echo-System/issues/1
+请求方法: POST
+```
+
+post表单
+
+```
+_method: put
+authenticity_token: PzMbO9pRivbdLu6XWdkyVmkqQMgpIBlnmEewtWjB20MQ81GMwqKPODYxfkEcYJ2yN1omtOMOCJy7VD0OxZQfiA==
+issue[title]: Test Title and 修改测试
+```
+
