@@ -2,6 +2,15 @@
 
 > GitHub 个人信息包括姓名、个人说明、邮箱、网站、头像，你需要在自己的后端中加入可以编辑个人信息的接口，包括查询和修改信息。研究 GitHub 是如何来完成这件事的，模仿 GitHub 的实现来编写自己的接口。在开始编码之前，书写一份接口文档，标注接口路径、HTTP Method、URL 参数、请求体和响应体数据类型、格式。
 
+## 数据库：mongo
+
+```
+mongodb://localhost:27017
+collection: echo-for-github
+```
+
+拿docker跑的
+
 ## 返回消息格式如下
 
 ```json
@@ -224,6 +233,17 @@ Model 定义
 
 ### how github do it
 
+#### 新建
+
+```
+https://github.com/CiroLong/Go-Echo-System/issues
+POST
+
+
+issue[title]: test 3
+issue[body]: how new a issue
+```
+
 #### get
 
 ```
@@ -236,14 +256,9 @@ Model 定义
 >
 >
 >1. 请求网址:
+    > https://github.com/CiroLong/Go-Echo-System/issue_comments
 >
->
->
->   https://github.com/CiroLong/Go-Echo-System/issue_comments
->
->2.
->
->   请求方法:
+>2.请求方法:
 >
 >
 >
@@ -275,4 +290,79 @@ _method: put
 authenticity_token: PzMbO9pRivbdLu6XWdkyVmkqQMgpIBlnmEewtWjB20MQ81GMwqKPODYxfkEcYJ2yN1omtOMOCJy7VD0OxZQfiA==
 issue[title]: Test Title and 修改测试
 ```
+
+### 自定义
+
+#### GET
+
+```
+请求网址: /cirolong/issues/[编号]
+请求方法: GET
+```
+
+返回标题， 创建者username
+
+评论（body和auther
+
+是否open
+
+#### 创建
+
+```
+请求网址: /cirolong/issues
+请求方法: POST
+```
+
+```
+issue[title]: ???
+issue[body]: how new a issue
+```
+
+返回创建成功，以及编号
+
+#### 评论
+
+```
+请求网址: /cirolong/issue_comments
+请求方法: POST
+```
+
+```
+issue: 1   //这里标识第几个issue
+comment[body]: 这是第二条回复
+```
+
+### api
+
+#### 获取 Issue 列表
+
+api: /cirolong/issues
+
+method： GET
+
+返回issue列表， 每一条包括
+
++ 编号
+
++ 发起人id
+
++ 标题
+
++ 状态
+
++ 评论数
+
+#### 获取 Issue 的详细情况
+
+参考GET issue
+
+#### 编辑 Issue 信息
+
+to be done
+
+#### 在 Issue 中发表回复
+
+参考issue的评论
+
+#### 关闭和开启 Issue
 

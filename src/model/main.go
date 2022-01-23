@@ -4,4 +4,5 @@ func InitModel() {
 	initDB()
 	initModelUser()
 	initModelUserImage()
+	initModelUserIssue()
 }

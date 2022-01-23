@@ -7,6 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+// 链接数据库
 const colNameUserImage = "userImageModel"
 
 var colUserImage *mongo.Collection
@@ -14,6 +15,8 @@ var colUserImage *mongo.Collection
 func initModelUserImage() {
 	colUserImage = MongoDB.Collection(colNameUserImage)
 }
+
+// 链接数据库
 
 type Image struct {
 	ID       primitive.ObjectID `bson:"_id" json:"_id"`
